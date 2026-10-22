@@ -28,9 +28,9 @@ nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#fff;padding-
 .kv{display:flex;gap:8px;align-items:baseline;padding:4px 0}.kv span{flex:1}.kv u{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
 .pie{width:170px;height:170px;border-radius:50%;margin:10px auto;-webkit-mask:radial-gradient(circle,#0000 48px,#000 49px);mask:radial-gradient(circle,#0000 48px,#000 49px)}
 .fl{display:flex;gap:6px;margin:8px 0}.fl select{flex:1}.fl button{flex:none}
-.pv{max-width:100%;max-height:160px;border-radius:8px;display:block;margin:6px 0}
+.ed i{outline:1.5px dashed var(--p)}.pv{max-width:100%;max-height:160px;border-radius:8px;display:block;margin:6px 0}
 </style></head><body>
-<div id="app"></div><div id="sh" class="sh"></div>
+<div id="app"></div><div id="sh" class="sh"></div><div id="sh2" class="sh" style="z-index:10"></div>
 <script>
 let D={trips:[],cats:[{id:'c1',e:'🍽️',n:'餐飲'},{id:'c2',e:'🏛️',n:'景點'},{id:'c3',e:'✈️',n:'機票'},{id:'c4',e:'🛍️',n:'購物'},{id:'c5',e:'🚌',n:'交通'},{id:'c6',e:'🏠',n:'住宿'}],mem:[{id:'m1',e:'🐱',n:'我'}]};
 let V={t:null,tab:0,day:'all',fc:'',fm:'',fo:0},X,Q,EM=0;
@@ -83,21 +83,26 @@ a.innerHTML=`<div class="hd"><button onclick="V.t=null;go()">🏠</button><b>${e
 <div class="card"><h3>💵 Cash 剩餘</h3>${cash||'<p class="m">請在旅程設定填入幣別與已換現金。</p>'}</div>
 <div class="card"><h3>💳 Card 已刷</h3><div class="kv"><span>合計</span><b>NT$ ${n0(sum(t,E.filter(x=>x.pay=='card')))}</b></div>${Object.entries(cd).map(([c,v])=>`<div class="kv"><span>${e(c)}</span><b>${n2(v)}</b></div>`).join('')}</div>`+nav()}
 // expense form
-function exForm(id){const t=T();if(!t.cur.length)return alert('請先在旅程設定新增幣別與匯率'),tripForm(t.id);
-X=id?{...t.ex.find(x=>x.id==id)}:{id:uid(),t:nowL(),cat:D.cats[0]?.id,cur:t.cur[0].c,amt:'',note:'',img:'',who:D.mem[0]?.id||'all',pay:'cash'};EM=0;xr()}
+function exForm(id){const t=T();
+X=id?{...t.ex.find(x=>x.id==id)}:{id:uid(),t:nowL(),cat:D.cats[0]?.id,cur:t.cur[0]?.c||'TWD',amt:'',note:'',img:'',who:D.mem[0]?.id||'all',pay:'cash'};EM=0;xr()}
 function pv(){const r=rate(T(),X.cur);$('#pv').textContent=`≈ NT$ ${n0((parseFloat(X.amt)||0)*r)}　匯率 ${r}`}
 function xr(){const t=T(),sh=$('#sh');sh.style.display='block';
-sh.innerHTML=`<div class="box"><div class="amt"><select onchange="X.cur=this.value;pv()">${t.cur.map(c=>`<option ${c.c==X.cur?'selected':''}>${e(c.c)}</option>`).join('')}</select><input inputmode="decimal" placeholder="0" value="${X.amt}" oninput="X.amt=this.value;pv()"></div><small id="pv"></small>
+sh.innerHTML=`<div class="box"><div class="amt"><select onchange="X.cur=this.value;pv()">${[...new Set([...t.cur.map(c=>c.c),'TWD',X.cur])].map(c=>`<option ${c==X.cur?'selected':''}>${e(c)}</option>`).join('')}</select><input inputmode="decimal" placeholder="0" value="${X.amt}" oninput="X.amt=this.value;pv()"></div><small id="pv"></small>
 <input placeholder="項目名稱（可留白）" value="${e(X.note)}" oninput="X.note=this.value">
-<div class="chips">${D.cats.map(c=>`<i class="${X.cat==c.id?'on':''}" onclick="EM?ed('cats','${c.id}'):(X.cat='${c.id}',xr())">${e(c.e)} ${e(c.n)}</i>`).join('')}<i onclick="ad('cats')">＋</i><i onclick="EM=!EM;xr()">${EM?'完成':'✎'}</i></div>
+<div class="chips ${EM=='cats'?'ed':''}">${D.cats.map(c=>`<i class="${X.cat==c.id?'on':''}" onclick="EM=='cats'?ed('cats','${c.id}'):(X.cat='${c.id}',xr())">${e(c.e)} ${e(c.n)}</i>`).join('')}<i onclick="ed('cats')">＋</i><i onclick="EM=EM=='cats'?0:'cats';xr()">${EM=='cats'?'完成':'✎'}</i></div>${EM=='cats'?'<small>點分類可修改或刪除</small>':''}
 <input type="datetime-local" value="${X.t}" onchange="X.t=this.value">
 <div class="chips"><i class="${X.pay=='cash'?'on':''}" onclick="X.pay='cash';xr()">💵 Cash</i><i class="${X.pay=='card'?'on':''}" onclick="X.pay='card';xr()">💳 Card</i></div>
-<div class="chips"><i class="${X.who=='all'?'on':''}" onclick="X.who='all';xr()">👥 大家</i>${D.mem.map(m=>`<i class="${X.who==m.id?'on':''}" onclick="EM?ed('mem','${m.id}'):(X.who='${m.id}',xr())">${e(m.e)} ${e(m.n)}</i>`).join('')}<i onclick="ad('mem')">＋</i></div>
+<div class="chips ${EM=='mem'?'ed':''}"><i class="${X.who=='all'?'on':''}" onclick="X.who='all';xr()">👥 大家</i>${D.mem.map(m=>`<i class="${X.who==m.id?'on':''}" onclick="EM=='mem'?ed('mem','${m.id}'):(X.who='${m.id}',xr())">${e(m.e)} ${e(m.n)}</i>`).join('')}<i onclick="ed('mem')">＋</i><i onclick="EM=EM=='mem'?0:'mem';xr()">${EM=='mem'?'完成':'✎'}</i></div>${EM=='mem'?'<small>點成員可修改或刪除</small>':''}
 <label class="btn">📷 照片<input type="file" accept="image/*" hidden onchange="ph(this)"></label>${X.img?`<img class="pv" src="${X.img}"><button onclick="X.img='';xr()">移除照片</button>`:''}
 <div class="row" style="margin-top:12px"><button onclick="cl()">取消</button>${t.ex.some(x=>x.id==X.id)?'<button onclick="dx()">刪除</button>':''}<button class="pri" onclick="ok()">完成</button></div></div>`;pv()}
 async function ph(i){if(i.files[0]){X.img=await rs(i.files[0],900);xr()}}
-function ed(k,id){const l=D[k],c=l.find(x=>x.id==id),s=prompt('修改「表情 名稱」，清空則刪除',c.e+' '+c.n);if(s===null)return;if(!s.trim())D[k]=l.filter(x=>x.id!=id);else{const[a,...b]=s.trim().split(/\s+/);c.e=a;c.n=b.join(' ')||c.n}if(!D.cats.some(c=>c.id==X.cat))X.cat=D.cats[0]?.id;if(X.who!='all'&&!D.mem.some(m=>m.id==X.who))X.who='all';save();xr()}
-function ad(k){const s=prompt('新增「表情 名稱」，例如 🍜 拉麵');if(!s||!s.trim())return;const[a,...b]=s.trim().split(/\s+/),c={id:uid(),e:a,n:b.join(' ')||a};D[k].push(c);X[k=='cats'?'cat':'who']=c.id;save();xr()}
+let Z;
+const g1=t=>{t=t.trim();return t&&(Intl.Segmenter?[...new Intl.Segmenter().segment(t)][0].segment:[...t][0])};
+function ed(k,id){const c=id?D[k].find(x=>x.id==id):{e:'',n:''};Z={k,id,e:c.e,n:c.n};zr()}
+function zr(){const m=$('#sh2');m.style.display='block';m.innerHTML=`<div class="box"><h3>${Z.id?'編輯':'新增'}${Z.k=='cats'?'分類':'成員'}</h3><div class="row"><input style="flex:0 0 72px;font-size:24px;text-align:center" placeholder="😀" value="${e(Z.e)}" oninput="Z.e=this.value"><input placeholder="名稱" value="${e(Z.n)}" oninput="Z.n=this.value"></div><div class="row"><button onclick="zc()">取消</button>${Z.id?'<button onclick="zd()">刪除</button>':''}<button class="pri" onclick="zs()">儲存</button></div></div>`}
+const zc=()=>{$('#sh2').style.display='none'};
+function zs(){const em=g1(Z.e),n=Z.n.trim();if(!em||!n)return alert('請填入表情與名稱');if(Z.id){const c=D[Z.k].find(x=>x.id==Z.id);c.e=em;c.n=n}else{const c={id:uid(),e:em,n};D[Z.k].push(c);X[Z.k=='cats'?'cat':'who']=c.id}zc();save();xr()}
+function zd(){if(!confirm('刪除後，已記的消費會顯示為未分類／未知成員。確定刪除？'))return;D[Z.k]=D[Z.k].filter(x=>x.id!=Z.id);if(!D.cats.some(c=>c.id==X.cat))X.cat=D.cats[0]?.id;if(X.who!='all'&&!D.mem.some(m=>m.id==X.who))X.who='all';zc();save();xr()}
 function ok(){const t=T(),v=parseFloat(X.amt);if(!(v>0))return alert('請輸入金額');X.amt=v;const i=t.ex.findIndex(x=>x.id==X.id);i<0?t.ex.push(X):t.ex[i]=X;cl();commit()}
 function dx(){if(confirm('刪除這筆消費？')){const t=T();t.ex=t.ex.filter(x=>x.id!=X.id);cl();commit()}}
 const cl=()=>{$('#sh').style.display='none'};
