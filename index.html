@@ -1,0 +1,119 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅遊記帳">
+<title>旅遊記帳</title>
+<style>
+:root{--p:#5b3fd0;--bg:#f3f3f8;--t:#1b1b24;--m:#8a8a99;--r:#d9363e}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{font:15px/1.4 -apple-system,"PingFang TC",sans-serif;background:var(--bg);color:var(--t);padding:env(safe-area-inset-top) 12px calc(96px + env(safe-area-inset-bottom))}
+h1{font-size:28px;margin:16px 0}h2{font-size:30px}h3{margin-bottom:8px}h4{margin:10px 0 4px;font-size:13px;color:var(--m)}.m,small{color:var(--m)}
+button,.btn,select,input{font:inherit;padding:9px 12px;border:1px solid #d8d8e4;border-radius:10px;background:#fff;color:inherit}
+.btn{display:inline-block}input,select{width:100%;margin:4px 0}
+.row{display:flex;gap:6px;align-items:center;margin:6px 0}.row>*{flex:1;min-width:0}
+.pri{background:var(--p);color:#fff;border:0}
+.card{background:#fff;border-radius:14px;padding:12px;margin:8px 0}
+.trip{height:130px;background-size:cover;background-position:center;color:#fff;display:flex;flex-direction:column;justify-content:flex-end}.trip small{color:#ddd}.trip span{font-size:18px;font-weight:700}
+.hd{display:flex;justify-content:space-between;align-items:center;margin:10px 0}.hd button{border:0;background:none;font-size:20px;padding:4px 10px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0}.tabs i{font-style:normal;flex:none;min-width:46px;text-align:center;padding:6px 8px;border-radius:12px}.tabs s{display:block;text-decoration:none;font-size:11px;color:var(--m)}.tabs .we,.tabs .we s{color:var(--r)}.tabs .on{background:var(--p);color:#fff}.tabs .on s{color:#fff}
+.sum{display:flex;gap:8px;margin-top:6px}.sum div{flex:1;background:#fff;border-radius:12px;padding:10px;font-size:12px;color:var(--m)}.sum b{display:block;font-size:19px;color:var(--t)}
+.dh{display:flex;justify-content:space-between;color:var(--m);font-size:12px;margin:14px 4px 0}
+.ex{display:flex;gap:10px;align-items:flex-start}.em{font-size:26px}.mid{flex:1;min-width:0}.tm{font-size:12px;color:var(--m)}.mid img{width:64px;height:64px;object-fit:cover;border-radius:8px;margin-top:4px}
+.am{text-align:right}.am b{color:var(--r);font-size:17px;display:block}
+.fab{position:fixed;right:18px;bottom:calc(76px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;background:var(--p);color:#fff;border:0;font-size:28px;padding:0}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#fff;padding-bottom:env(safe-area-inset-bottom);border-top:1px solid #e4e4ee}nav i{flex:1;text-align:center;padding:14px;font-style:normal}nav .on{color:var(--p);font-weight:700}
+.sh{display:none;position:fixed;inset:0;background:#0006;overflow:auto;z-index:9}.box{background:#fff;margin:calc(env(safe-area-inset-top) + 24px) 10px;border-radius:16px;padding:14px}
+.amt{display:flex;gap:6px;align-items:center}.amt select{width:90px}.amt input{flex:1;font-size:26px;color:var(--r);font-weight:700}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:6px 0}.chips i{flex:none;font-style:normal;padding:7px 11px;border-radius:12px;background:#eee}.chips .on{background:var(--p);color:#fff}
+.kv{display:flex;gap:8px;align-items:baseline;padding:4px 0}.kv span{flex:1}.kv u{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.pie{width:170px;height:170px;border-radius:50%;margin:10px auto;-webkit-mask:radial-gradient(circle,#0000 48px,#000 49px);mask:radial-gradient(circle,#0000 48px,#000 49px)}
+.fl{display:flex;gap:6px;margin:8px 0}.fl select{flex:1}.fl button{flex:none}
+.pv{max-width:100%;max-height:160px;border-radius:8px;display:block;margin:6px 0}
+</style></head><body>
+<div id="app"></div><div id="sh" class="sh"></div>
+<script>
+let D={trips:[],cats:[{id:'c1',e:'🍽️',n:'餐飲'},{id:'c2',e:'🏛️',n:'景點'},{id:'c3',e:'✈️',n:'機票'},{id:'c4',e:'🛍️',n:'購物'},{id:'c5',e:'🚌',n:'交通'},{id:'c6',e:'🏠',n:'住宿'}],mem:[{id:'m1',e:'🐱',n:'我'}]};
+let V={t:null,tab:0,day:'all',fc:'',fm:'',fo:0},X,Q,EM=0;
+const $=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9);
+const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const n0=x=>Math.round(x).toLocaleString('en-US'),n2=x=>x.toLocaleString('en-US',{maximumFractionDigits:2});
+const p2=x=>String(x).padStart(2,'0'),ymd=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+const nowL=()=>{const d=new Date();return ymd(d)+'T'+p2(d.getHours())+':'+p2(d.getMinutes())};
+const T=()=>D.trips.find(x=>x.id==V.t);
+const rate=(t,c)=>c=='TWD'?1:+(t.cur.find(x=>x.c==c)||{}).r||0;
+const twd=(t,x)=>x.amt*rate(t,x.cur),sum=(l,t)=>l.reduce((s,x)=>s+twd(t,x),0);
+const cat=id=>D.cats.find(c=>c.id==id)||{e:'❓',n:'未分類'};
+const mem=id=>id=='all'?{e:'👥',n:'大家'}:D.mem.find(m=>m.id==id)||{e:'👤',n:'?'};
+const dk=x=>x.t.slice(0,10),WD='日一二三四五六';
+// storage
+const DB=()=>new Promise((ok,no)=>{const r=indexedDB.open('trip',1);r.onupgradeneeded=()=>r.result.createObjectStore('k');r.onsuccess=()=>ok(r.result);r.onerror=no});
+async function load(){try{const d=await DB();return await new Promise(ok=>{const q=d.transaction('k').objectStore('k').get('s');q.onsuccess=()=>ok(q.result);q.onerror=()=>ok()})}catch(_){}}
+async function save(){try{const d=await DB();d.transaction('k','readwrite').objectStore('k').put(D,'s')}catch(_){}}
+const commit=()=>{save();go()};
+function rs(f,m){return new Promise(ok=>{const i=new Image();i.onload=()=>{const k=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.7))};i.src=URL.createObjectURL(f)})}
+function exp(){const b=new Blob([JSON.stringify(D)],{type:'application/json'}),f=new File([b],'trip-backup.json',{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f]}).catch(()=>{});else{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;a.click()}}
+function imp(i){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.trips&&confirm('匯入會覆蓋目前所有資料，確定？')){D=d;V.t=null;commit()}}catch(_){alert('檔案格式錯誤')}};r.readAsText(i.files[0])}
+// days
+function days(t){const a=[];if(!t.start||!t.end)return a;const d=new Date(t.start+'T00:00'),z=new Date(t.end+'T00:00');while(d<=z&&a.length<120){a.push(ymd(d));d.setDate(d.getDate()+1)}return a}
+const wd=k=>new Date(k+'T00:00').getDay(),wk=k=>k.length>5&&[0,6].includes(wd(k));
+function vis(t){return t.ex.filter(x=>{const k=dk(x);if(V.day=='pre'?k>=t.start:V.day!='all'&&k!=V.day)return false;return(!V.fc||x.cat==V.fc)&&(!V.fm||x.who==V.fm)}).sort((a,b)=>a.t<b.t?-1:1)}
+function go(){const a=$('#app');!V.t?home(a):V.tab?stats(a):list(a)}
+const nav=()=>`<nav><i class="${V.tab?'':'on'}" onclick="V.tab=0;go()">📋 明細</i><i class="${V.tab?'on':''}" onclick="V.tab=1;go()">📊 統計</i></nav>`;
+function home(a){const ts=[...D.trips].sort((x,y)=>(y.start||'')<(x.start||'')?-1:1);
+a.innerHTML=`<h1>旅程</h1>${ts.map(t=>`<div class="card trip" style="${t.img?`background-image:linear-gradient(#0000,#000a),url(${t.img})`:'background:var(--p)'}" onclick="V.t='${t.id}';V.day='all';V.tab=0;V.fc=V.fm='';go()"><b>${e(t.name)}</b><small>${e(t.country)} ${t.start||''}～${t.end||''}</small><span>NT$ ${n0(sum(t,t.ex))}</span></div>`).join('')||'<p class="m">還沒有旅程，點右下角新增。</p>'}
+<div class="row"><button onclick="exp()">匯出備份</button><label class="btn">匯入備份<input type="file" accept=".json" hidden onchange="imp(this)"></label></div><button class="fab" onclick="tripForm()" style="bottom:24px">＋</button>`}
+function list(a){const t=T(),ds=days(t),L=vis(t),today=ymd(new Date()),tabs=[['all','All'],['pre','Pre'],...ds.map(k=>[k,k.slice(8)])];
+let h=`<div class="hd"><button onclick="V.t=null;go()">🏠</button><b>${e(t.name)}</b><button onclick="tripForm('${t.id}')">⋯</button></div>
+<div class="tabs">${tabs.map(([k,l])=>`<i class="${V.day==k?'on':''} ${wk(k)?'we':''}" onclick="V.day='${k}';go()">${k.length>5?`<s>${WD[wd(k)]}</s>`:''}${l}</i>`).join('')}</div>
+<div class="sum"><div>Today spent<b>NT$ ${n0(sum(t,t.ex.filter(x=>dk(x)==today)))}</b></div><div>Total spent<b>NT$ ${n0(sum(t,t.ex))}</b></div></div>
+<div class="fl"><button onclick="V.fo=!V.fo;go()">篩選${V.fc||V.fm?' •':''}</button>${V.fo?`<select onchange="V.fc=this.value;go()"><option value="">全部分類</option>${D.cats.map(c=>`<option value="${c.id}" ${V.fc==c.id?'selected':''}>${e(c.e)} ${e(c.n)}</option>`).join('')}</select><select onchange="V.fm=this.value;go()"><option value="">全部成員</option>${['all',...D.mem.map(m=>m.id)].map(i=>`<option value="${i}" ${V.fm==i?'selected':''}>${e(mem(i).e)} ${e(mem(i).n)}</option>`).join('')}</select>`:''}</div>`;
+let last='';
+L.forEach(x=>{const k=dk(x);if(k!=last){last=k;const gi=ds.indexOf(k);h+=`<div class="dh"><span>${k<t.start?'Pre':gi>=0?'DAY '+(gi+1):''} ${k}</span><span>NT$ ${n0(sum(t,L.filter(y=>dk(y)==k)))}</span></div>`}
+h+=`<div class="card ex" onclick="exForm('${x.id}')"><div class="em">${e(cat(x.cat).e)}</div><div class="mid"><div class="tm">${x.t.slice(11)} ${x.pay=='cash'?'💵':'💳'} ${e(mem(x.who).e)}</div><div>${x.note?e(x.note):`<span class="m">${e(cat(x.cat).n)}</span>`}</div>${x.img?`<img src="${x.img}">`:''}</div><div class="am"><b>${n2(x.amt)} ${e(x.cur)}</b><small>NT$ ${n0(twd(t,x))}</small></div></div>`});
+if(!L.length)h+='<p class="m" style="margin:24px 4px">沒有消費紀錄，點右下角新增。</p>';
+a.innerHTML=h+`<button class="fab" onclick="exForm()">＋</button>`+nav()}
+function stats(a){const t=T(),E=t.ex,tot=sum(t,E),by={},cd={},col=['#5b3fd0','#e86f5b','#f2b84b','#4bb3a0','#4f86d9','#b06ad6','#8bc34a','#9aa0ab'];
+E.forEach(x=>{by[x.cur]=(by[x.cur]||0)+x.amt;if(x.pay=='card')cd[x.cur]=(cd[x.cur]||0)+x.amt});
+const cs=[...new Set(E.map(x=>x.cat))].map(id=>({c:cat(id),v:sum(t,E.filter(x=>x.cat==id))})).sort((p,q)=>q.v-p.v);
+let acc=0;const gr=cs.map((o,i)=>{const s=acc/tot*100;acc+=o.v;return`${col[i%8]} ${s}% ${acc/tot*100}%`}).join(',');
+const cash=t.cur.map(c=>{const sp=E.filter(x=>x.cur==c.c&&x.pay=='cash').reduce((s,x)=>s+x.amt,0);return`<div class="kv"><span>${e(c.c)}</span><b>${n2(c.cash-sp)}</b><small>已換 ${n2(c.cash)}</small></div>`}).join('');
+a.innerHTML=`<div class="hd"><button onclick="V.t=null;go()">🏠</button><b>${e(t.name)}</b><span></span></div>
+<div class="card"><small>Total expense</small><h2>NT$ ${n0(tot)}</h2>${Object.entries(by).map(([c,v])=>`<div class="kv"><span>${e(c)}</span><b>${n2(v)}</b></div>`).join('')}</div>
+<div class="card"><h3>分類比例</h3>${tot?`<div class="pie" style="background:conic-gradient(${gr})"></div>`:'<p class="m">還沒有消費。</p>'}${cs.map((o,i)=>`<div class="kv"><span><u style="background:${col[i%8]}"></u>${e(o.c.e)} ${e(o.c.n)}</span><b>NT$ ${n0(o.v)}</b><small>${(o.v/tot*100).toFixed(1)}%</small></div>`).join('')}</div>
+<div class="card"><h3>💵 Cash 剩餘</h3>${cash||'<p class="m">請在旅程設定填入幣別與已換現金。</p>'}</div>
+<div class="card"><h3>💳 Card 已刷</h3><div class="kv"><span>合計</span><b>NT$ ${n0(sum(t,E.filter(x=>x.pay=='card')))}</b></div>${Object.entries(cd).map(([c,v])=>`<div class="kv"><span>${e(c)}</span><b>${n2(v)}</b></div>`).join('')}</div>`+nav()}
+// expense form
+function exForm(id){const t=T();if(!t.cur.length)return alert('請先在旅程設定新增幣別與匯率'),tripForm(t.id);
+X=id?{...t.ex.find(x=>x.id==id)}:{id:uid(),t:nowL(),cat:D.cats[0]?.id,cur:t.cur[0].c,amt:'',note:'',img:'',who:D.mem[0]?.id||'all',pay:'cash'};EM=0;xr()}
+function pv(){const r=rate(T(),X.cur);$('#pv').textContent=`≈ NT$ ${n0((parseFloat(X.amt)||0)*r)}　匯率 ${r}`}
+function xr(){const t=T(),sh=$('#sh');sh.style.display='block';
+sh.innerHTML=`<div class="box"><div class="amt"><select onchange="X.cur=this.value;pv()">${t.cur.map(c=>`<option ${c.c==X.cur?'selected':''}>${e(c.c)}</option>`).join('')}</select><input inputmode="decimal" placeholder="0" value="${X.amt}" oninput="X.amt=this.value;pv()"></div><small id="pv"></small>
+<input placeholder="項目名稱（可留白）" value="${e(X.note)}" oninput="X.note=this.value">
+<div class="chips">${D.cats.map(c=>`<i class="${X.cat==c.id?'on':''}" onclick="EM?ed('cats','${c.id}'):(X.cat='${c.id}',xr())">${e(c.e)} ${e(c.n)}</i>`).join('')}<i onclick="ad('cats')">＋</i><i onclick="EM=!EM;xr()">${EM?'完成':'✎'}</i></div>
+<input type="datetime-local" value="${X.t}" onchange="X.t=this.value">
+<div class="chips"><i class="${X.pay=='cash'?'on':''}" onclick="X.pay='cash';xr()">💵 Cash</i><i class="${X.pay=='card'?'on':''}" onclick="X.pay='card';xr()">💳 Card</i></div>
+<div class="chips"><i class="${X.who=='all'?'on':''}" onclick="X.who='all';xr()">👥 大家</i>${D.mem.map(m=>`<i class="${X.who==m.id?'on':''}" onclick="EM?ed('mem','${m.id}'):(X.who='${m.id}',xr())">${e(m.e)} ${e(m.n)}</i>`).join('')}<i onclick="ad('mem')">＋</i></div>
+<label class="btn">📷 照片<input type="file" accept="image/*" hidden onchange="ph(this)"></label>${X.img?`<img class="pv" src="${X.img}"><button onclick="X.img='';xr()">移除照片</button>`:''}
+<div class="row" style="margin-top:12px"><button onclick="cl()">取消</button>${t.ex.some(x=>x.id==X.id)?'<button onclick="dx()">刪除</button>':''}<button class="pri" onclick="ok()">完成</button></div></div>`;pv()}
+async function ph(i){if(i.files[0]){X.img=await rs(i.files[0],900);xr()}}
+function ed(k,id){const l=D[k],c=l.find(x=>x.id==id),s=prompt('修改「表情 名稱」，清空則刪除',c.e+' '+c.n);if(s===null)return;if(!s.trim())D[k]=l.filter(x=>x.id!=id);else{const[a,...b]=s.trim().split(/\s+/);c.e=a;c.n=b.join(' ')||c.n}if(!D.cats.some(c=>c.id==X.cat))X.cat=D.cats[0]?.id;if(X.who!='all'&&!D.mem.some(m=>m.id==X.who))X.who='all';save();xr()}
+function ad(k){const s=prompt('新增「表情 名稱」，例如 🍜 拉麵');if(!s||!s.trim())return;const[a,...b]=s.trim().split(/\s+/),c={id:uid(),e:a,n:b.join(' ')||a};D[k].push(c);X[k=='cats'?'cat':'who']=c.id;save();xr()}
+function ok(){const t=T(),v=parseFloat(X.amt);if(!(v>0))return alert('請輸入金額');X.amt=v;const i=t.ex.findIndex(x=>x.id==X.id);i<0?t.ex.push(X):t.ex[i]=X;cl();commit()}
+function dx(){if(confirm('刪除這筆消費？')){const t=T();t.ex=t.ex.filter(x=>x.id!=X.id);cl();commit()}}
+const cl=()=>{$('#sh').style.display='none'};
+// trip form
+function tripForm(id){const o=id&&D.trips.find(x=>x.id==id);Q=o?{...o,cur:o.cur.map(c=>({...c}))}:{id:uid(),name:'',country:'',start:'',end:'',img:'',cur:[{c:'',r:'',cash:''}],ex:[]};tr()}
+function tr(){const sh=$('#sh');sh.style.display='block';
+sh.innerHTML=`<div class="box"><h3>旅程設定</h3><input placeholder="旅程標題" value="${e(Q.name)}" oninput="Q.name=this.value"><input placeholder="國家" value="${e(Q.country)}" oninput="Q.country=this.value">
+<div class="row"><input type="date" value="${Q.start}" onchange="Q.start=this.value"><input type="date" value="${Q.end}" onchange="Q.end=this.value"></div>
+<label class="btn">🖼 封面圖<input type="file" accept="image/*" hidden onchange="cv(this)"></label> ${Q.img?'已選擇':''}
+<h4>幣別　匯率（1 外幣＝多少 NT$）　已換現金</h4>
+${Q.cur.map((c,i)=>`<div class="row"><input placeholder="EUR" style="text-transform:uppercase" value="${e(c.c)}" oninput="Q.cur[${i}].c=this.value.toUpperCase()"><input placeholder="匯率" inputmode="decimal" value="${c.r}" oninput="Q.cur[${i}].r=this.value"><input placeholder="現金" inputmode="decimal" value="${c.cash}" oninput="Q.cur[${i}].cash=this.value"><button style="flex:none" onclick="Q.cur.splice(${i},1);tr()">✕</button></div>`).join('')}
+<button onclick="Q.cur.push({c:'',r:'',cash:''});tr()">＋ 幣別</button>
+<div class="row" style="margin-top:12px"><button onclick="cl()">取消</button>${D.trips.some(x=>x.id==Q.id)?'<button onclick="dt()">刪除旅程</button>':''}<button class="pri" onclick="tk()">儲存</button></div></div>`}
+async function cv(i){if(i.files[0]){Q.img=await rs(i.files[0],1000);tr()}}
+function tk(){if(!Q.name.trim())return alert('請輸入旅程標題');const bad=Q.cur.some(c=>c.c.trim()&&c.c.trim()!='TWD'&&!parseFloat(c.r));if(bad)return alert('請填入每個外幣的匯率');
+Q.cur=Q.cur.filter(c=>c.c.trim()).map(c=>({c:c.c.trim(),r:parseFloat(c.r)||0,cash:parseFloat(c.cash)||0}));const i=D.trips.findIndex(x=>x.id==Q.id);i<0?D.trips.push(Q):D.trips[i]=Q;cl();commit()}
+function dt(){if(confirm('刪除整趟旅程與所有消費？')){D.trips=D.trips.filter(x=>x.id!=Q.id);V.t=null;cl();commit()}}
+(async()=>{const s=await load();if(s&&s.trips)D=s;navigator.storage?.persist?.();go()})();
+</script></body></html>
