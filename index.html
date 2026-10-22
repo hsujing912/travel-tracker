@@ -41,7 +41,7 @@ const p2=x=>String(x).padStart(2,'0'),ymd=d=>d.getFullYear()+'-'+p2(d.getMonth()
 const nowL=()=>{const d=new Date();return ymd(d)+'T'+p2(d.getHours())+':'+p2(d.getMinutes())};
 const T=()=>D.trips.find(x=>x.id==V.t);
 const rate=(t,c)=>c=='TWD'?1:+(t.cur.find(x=>x.c==c)||{}).r||0;
-const twd=(t,x)=>x.amt*rate(t,x.cur),sum=(l,t)=>l.reduce((s,x)=>s+twd(t,x),0);
+const twd=(t,x)=>x.amt*rate(t,x.cur),sum=(t,l)=>l.reduce((s,x)=>s+twd(t,x),0);
 const cat=id=>D.cats.find(c=>c.id==id)||{e:'❓',n:'未分類'};
 const mem=id=>id=='all'?{e:'👥',n:'大家'}:D.mem.find(m=>m.id==id)||{e:'👤',n:'?'};
 const dk=x=>x.t.slice(0,10),WD='日一二三四五六';
