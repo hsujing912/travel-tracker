@@ -6,15 +6,15 @@
 <style>
 :root{--p:#5b3fd0;--bg:#f3f3f8;--t:#1b1b24;--m:#8a8a99;--r:#d9363e}
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
-body{font:15px/1.4 -apple-system,"PingFang TC",sans-serif;background:var(--bg);color:var(--t);padding:env(safe-area-inset-top) 12px calc(96px + env(safe-area-inset-bottom))}
+body{font:15px/1.4 -apple-system,"PingFang TC",sans-serif;background:var(--bg);color:var(--t);padding:calc(env(safe-area-inset-top) + 14px) 12px calc(96px + env(safe-area-inset-bottom))}
 h1{font-size:28px;margin:16px 0}h2{font-size:30px}h3{margin-bottom:8px}h4{margin:10px 0 4px;font-size:13px;color:var(--m)}.m,small{color:var(--m)}
 button,.btn,select,input{font:inherit;padding:9px 12px;border:1px solid #d8d8e4;border-radius:10px;background:#fff;color:inherit}
 .btn{display:inline-block}input,select{width:100%;margin:4px 0}
 .row{display:flex;gap:6px;align-items:center;margin:6px 0}.row>*{flex:1;min-width:0}
 .pri{background:var(--p);color:#fff;border:0}
 .card{background:#fff;border-radius:14px;padding:12px;margin:8px 0}
-.trip{height:130px;background-size:cover;background-position:center;color:#fff;display:flex;flex-direction:column;justify-content:flex-end}.trip small{color:#ddd}.trip span{font-size:18px;font-weight:700}
-.hd{display:flex;justify-content:space-between;align-items:center;margin:10px 0}.hd button{border:0;background:none;font-size:20px;padding:4px 10px}
+.trip{height:130px;background-size:cover;background-position:center;color:#fff;display:flex;flex-direction:column;justify-content:flex-end}.trip b{font-size:18px;margin-bottom:5px}.trip small{color:#ddd;font-size:13px}.trip span{font-size:22px;font-weight:700;margin-top:4px}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:var(--bg);z-index:5}.hd{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;margin:10px 0}.hd b{text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hd button{border:0;background:none;font-size:20px;padding:4px 0}
 .tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0}.tabs i{font-style:normal;flex:none;min-width:46px;text-align:center;padding:6px 8px;border-radius:12px}.tabs s{display:block;text-decoration:none;font-size:11px;color:var(--m)}.tabs .we,.tabs .we s{color:var(--r)}.tabs .on{background:var(--p);color:#fff}.tabs .on s{color:#fff}
 .sum{display:flex;gap:8px;margin-top:6px}.sum div{flex:1;background:#fff;border-radius:12px;padding:10px;font-size:12px;color:var(--m)}.sum b{display:block;font-size:19px;color:var(--t)}
 .dh{display:flex;justify-content:space-between;color:var(--m);font-size:12px;margin:14px 4px 0}
@@ -76,12 +76,12 @@ function stats(a){const t=T(),E=t.ex,tot=sum(t,E),by={},cd={},col=['#5b3fd0','#e
 E.forEach(x=>{by[x.cur]=(by[x.cur]||0)+x.amt;if(x.pay=='card')cd[x.cur]=(cd[x.cur]||0)+x.amt});
 const cs=[...new Set(E.map(x=>x.cat))].map(id=>({c:cat(id),v:sum(t,E.filter(x=>x.cat==id))})).sort((p,q)=>q.v-p.v);
 let acc=0;const gr=cs.map((o,i)=>{const s=acc/tot*100;acc+=o.v;return`${col[i%8]} ${s}% ${acc/tot*100}%`}).join(',');
-const cash=t.cur.map(c=>{const sp=E.filter(x=>x.cur==c.c&&x.pay=='cash').reduce((s,x)=>s+x.amt,0);return`<div class="kv"><span>${e(c.c)}</span><b>${n2(c.cash-sp)}</b><small>已換 ${n2(c.cash)}</small></div>`}).join('');
+const cash=t.cur.map(c=>{const sp=E.filter(x=>x.cur==c.c&&x.pay=='cash').reduce((s,x)=>s+x.amt,0);return`<div class="kv"><span>${e(c.c)}</span><b>${n2(c.cash-sp)}</b><small>Exchanged ${n2(c.cash)}</small></div>`}).join('');
 a.innerHTML=`<div class="hd"><button onclick="V.t=null;go()">🏠</button><b>${e(t.name)}</b><span></span></div>
 <div class="card"><small>Total expense</small><h2>NT$ ${n0(tot)}</h2>${Object.entries(by).map(([c,v])=>`<div class="kv"><span>${e(c)}</span><b>${n2(v)}</b></div>`).join('')}</div>
 <div class="card"><h3>分類比例</h3>${tot?`<div class="pie" style="background:conic-gradient(${gr})"></div>`:'<p class="m">還沒有消費。</p>'}${cs.map((o,i)=>`<div class="kv"><span><u style="background:${col[i%8]}"></u>${e(o.c.e)} ${e(o.c.n)}</span><b>NT$ ${n0(o.v)}</b><small>${(o.v/tot*100).toFixed(1)}%</small></div>`).join('')}</div>
-<div class="card"><h3>💵 Cash 剩餘</h3>${cash||'<p class="m">請在旅程設定填入幣別與已換現金。</p>'}</div>
-<div class="card"><h3>💳 Card 已刷</h3><div class="kv"><span>合計</span><b>NT$ ${n0(sum(t,E.filter(x=>x.pay=='card')))}</b></div>${Object.entries(cd).map(([c,v])=>`<div class="kv"><span>${e(c)}</span><b>${n2(v)}</b></div>`).join('')}</div>`+nav()}
+<div class="card"><h3>💵 Cash Balance</h3>${cash||'<p class="m">Add exchanged cash in trip settings.</p>'}</div>
+<div class="card"><h3>💳 Card Spending</h3><div class="kv"><span>Total</span><b>NT$ ${n0(sum(t,E.filter(x=>x.pay=='card')))}</b></div>${Object.entries(cd).map(([c,v])=>`<div class="kv"><span>${e(c)}</span><b>${n2(v)}</b></div>`).join('')}</div>`+nav()}
 // expense form
 function exForm(id){const t=T();
 X=id?{...t.ex.find(x=>x.id==id)}:{id:uid(),t:nowL(),cat:D.cats[0]?.id,cur:t.cur[0]?.c||'TWD',amt:'',note:'',img:'',who:D.mem[0]?.id||'all',pay:'cash'};EM=0;xr()}
