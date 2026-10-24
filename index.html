@@ -28,7 +28,7 @@ nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#fff;padding-
 .kv{display:flex;gap:8px;align-items:baseline;padding:4px 0}.kv span{flex:1}.kv u{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
 .pie{width:170px;height:170px;border-radius:50%;margin:10px auto;-webkit-mask:radial-gradient(circle,#0000 48px,#000 49px);mask:radial-gradient(circle,#0000 48px,#000 49px)}
 .fl{display:flex;gap:6px;margin:8px 0}.fl select{flex:1}.fl button{flex:none}
-.ed i{outline:1.5px dashed var(--p)}.pv{max-width:100%;max-height:160px;border-radius:8px;display:block;margin:6px 0}
+.ed i{outline:1.5px dashed var(--p)}.ch{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px}.ch h3{margin:0}.ch small{text-align:right}.pv{max-width:100%;max-height:160px;border-radius:8px;display:block;margin:6px 0}
 </style></head><body>
 <div id="app"></div><div id="sh" class="sh"></div><div id="sh2" class="sh" style="z-index:10"></div>
 <script>
@@ -76,11 +76,11 @@ function stats(a){const t=T(),E=t.ex,tot=sum(t,E),by={},cd={},col=['#5b3fd0','#e
 E.forEach(x=>{by[x.cur]=(by[x.cur]||0)+x.amt;if(x.pay=='card')cd[x.cur]=(cd[x.cur]||0)+x.amt});
 const cs=[...new Set(E.map(x=>x.cat))].map(id=>({c:cat(id),v:sum(t,E.filter(x=>x.cat==id))})).sort((p,q)=>q.v-p.v);
 let acc=0;const gr=cs.map((o,i)=>{const s=acc/tot*100;acc+=o.v;return`${col[i%8]} ${s}% ${acc/tot*100}%`}).join(',');
-const cash=t.cur.map(c=>{const sp=E.filter(x=>x.cur==c.c&&x.pay=='cash').reduce((s,x)=>s+x.amt,0);return`<div class="kv"><span>${e(c.c)}</span><b>${n2(c.cash-sp)}</b><small>Exchanged ${n2(c.cash)}</small></div>`}).join('');
+const cash=t.cur.map(c=>{const sp=E.filter(x=>x.cur==c.c&&x.pay=='cash').reduce((s,x)=>s+x.amt,0);return`<div class="kv"><span>${e(c.c)}</span><b>${n2(c.cash-sp)}</b></div>`}).join('');
 a.innerHTML=`<div class="hd"><button onclick="V.t=null;go()">🏠</button><b>${e(t.name)}</b><span></span></div>
 <div class="card"><small>Total expense</small><h2>NT$ ${n0(tot)}</h2>${Object.entries(by).map(([c,v])=>`<div class="kv"><span>${e(c)}</span><b>${n2(v)}</b></div>`).join('')}</div>
 <div class="card"><h3>分類比例</h3>${tot?`<div class="pie" style="background:conic-gradient(${gr})"></div>`:'<p class="m">還沒有消費。</p>'}${cs.map((o,i)=>`<div class="kv"><span><u style="background:${col[i%8]}"></u>${e(o.c.e)} ${e(o.c.n)}</span><b>NT$ ${n0(o.v)}</b><small>${(o.v/tot*100).toFixed(1)}%</small></div>`).join('')}</div>
-<div class="card"><h3>💵 Cash Balance</h3>${cash||'<p class="m">Add exchanged cash in trip settings.</p>'}</div>
+<div class="card"><div class="ch"><h3>💵 Cash Balance</h3>${t.cur.length?`<small>Exchanged ${t.cur.map(c=>e(c.c)+' '+n2(c.cash)).join(' · ')}</small>`:''}</div>${cash||'<p class="m">Add exchanged cash in trip settings.</p>'}</div>
 <div class="card"><h3>💳 Card Spending</h3><div class="kv"><span>Total</span><b>NT$ ${n0(sum(t,E.filter(x=>x.pay=='card')))}</b></div>${Object.entries(cd).map(([c,v])=>`<div class="kv"><span>${e(c)}</span><b>${n2(v)}</b></div>`).join('')}</div>`+nav()}
 // expense form
 function exForm(id){const t=T();
